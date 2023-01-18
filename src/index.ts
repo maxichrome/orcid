@@ -19,6 +19,9 @@ discord.once('ready', (discord) => {
 })
 
 discord.on('messageCreate', async (msg) => {
+	if (msg.author.bot) return
+	if (msg.attachments.size < 1) return
+
 	let processing_promises: Promise<string>[]
 	let typing_interval: ReturnType<typeof setInterval>
 
