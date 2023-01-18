@@ -89,9 +89,9 @@ discord.on('messageCreate', async (msg) => {
 				.setTitle(path.basename(attachment.url))
 				.setThumbnail(attachment.proxyURL ?? attachment.url)
 				.setColor(typeof result === 'string' ? 0x0000ee : 0xee0000)
-				.setDescription(result ?? '')
+				.setDescription(result ?? '<No text found>')
 				.setFooter({
-					text: result ? `Recognized in ${timeInMs}ms` : 'No text was found.',
+					text: `Processed in ${timeInMs}ms`,
 				})
 		}),
 		allowedMentions: {
