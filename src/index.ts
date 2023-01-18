@@ -58,7 +58,12 @@ discord.on('messageCreate', async (msg) => {
 	clearInterval(typing_interval)
 
 	if (ocr_results.length < 1) {
-		msg.reply('No text was found')
+		msg.reply({
+			content: 'No text was found',
+			allowedMentions: {
+				repliedUser: false,
+			},
+		})
 		return
 	}
 
@@ -68,6 +73,9 @@ discord.on('messageCreate', async (msg) => {
 Text found:\n\
 \n\
 ${ocr_results.join('\n\n')}`,
+		allowedMentions: {
+			repliedUser: false,
+		},
 	})
 })
 
