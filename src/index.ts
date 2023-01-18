@@ -10,6 +10,7 @@ dotenv.config({
 })
 
 function startUp(token: string) {
+	console.log('Starting.')
 	discord.login(token)
 }
 
@@ -18,20 +19,8 @@ discord.once('ready', (discord) => {
 })
 
 discord.on('messageCreate', async (msg) => {
-	let typing_promise: Promise<void>
 	let processing_promises: Promise<string>[]
 	let typing_interval: ReturnType<typeof setInterval>
-
-	const makeTypingPromise = () =>
-		// a promise that never resolves, always sends typing until stopped
-		// we will plug this into a Promise.race later so do not worry ;)
-		new Promise<void>((_, reject) => {
-			typing_interval = setInterval(() => {
-				msg.channel.sendTyping().catch(reject)
-			}, 5000)
-		})
-
-	console.log(msg.attachments.map((a) => a.contentType).join('...'))
 
 	const image_attachments = msg.attachments.filter(
 		(attachment) =>
@@ -47,16 +36,28 @@ discord.on('messageCreate', async (msg) => {
 		return
 	}
 
-	typing_promise = makeTypingPromise()
+	typing_interval = setInterval(() => {
+		msg.channel
+			.sendTyping()
+			.catch((err) =>
+				console.log(`NO-TYP: Typing event not sent due to error\n${err}`)
+			)
+	}, 3000)
+
 	processing_promises = image_attachments.map((attachment) =>
 		// TODO: need to account for errors from GCP api
 		transcribeImageText(attachment.url)
 	)
 
-	const ocr_results = await Promise.all(processing_promises)
+	let ocr_results = await Promise.all(processing_promises)
+	ocr_results = ocr_results.filter(
+		(result) => typeof result === 'string' && result.length > 0
+	)
+
+	// we have our results! stop "typing"
 	clearInterval(typing_interval)
 
-	if (ocr_results.length <= 0) {
+	if (ocr_results.length < 1) {
 		msg.reply('No text was found')
 		return
 	}
