@@ -23,6 +23,13 @@ discord.on('messageCreate', async (msg) => {
 	if (msg.author.bot) return
 	if (msg.attachments.size < 1) return
 
+	// hardcoded channel id if we are masochists
+	if (
+		process.env.DONT_USE_THIS_HARDCODED_CHANNEL_ID &&
+		msg.channelId !== process.env.DONT_USE_THIS_HARDCODED_CHANNEL_ID
+	)
+		return
+
 	let processing_promises: Promise<{
 		result: string | null
 		timeInMs: number
