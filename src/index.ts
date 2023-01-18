@@ -23,7 +23,10 @@ discord.on('messageCreate', async (msg) => {
 	if (msg.author.bot) return
 	if (msg.attachments.size < 1) return
 
-	let processing_promises: Promise<string | null>[]
+	let processing_promises: Promise<{
+		result: string | null
+		timeInMs: number
+	}>[]
 	let typing_interval: ReturnType<typeof setInterval>
 
 	const image_attachments = msg.attachments.filter(
@@ -48,37 +51,41 @@ discord.on('messageCreate', async (msg) => {
 			)
 	}, 3000)
 
-	const before_transcription_timestamp = new Date()
+	processing_promises = image_attachments.map(async (attachment) => {
+		const before_transcription_timestamp = new Date()
 
-	processing_promises = image_attachments.map((attachment) =>
 		// TODO: need to account for errors from GCP api
-		transcribeImageText(attachment.url)
-	)
+		const transcription_result = await transcribeImageText(attachment.url)
+
+		const after_transcription_timestamp = new Date()
+
+		const time_spent_transcribing =
+			after_transcription_timestamp.getTime() -
+			before_transcription_timestamp.getTime()
+
+		return {
+			result: transcription_result,
+			timeInMs: time_spent_transcribing,
+		}
+	})
 
 	let ocr_results_original = await Promise.all(processing_promises)
-
-	const after_transcription_timestamp = new Date()
-	const time_spent_transcribing =
-		after_transcription_timestamp.getTime() -
-		before_transcription_timestamp.getTime()
 
 	// we have our results! stop "typing"
 	clearInterval(typing_interval)
 
 	// TODO: need to account for splitting at >2000 characters
 	msg.reply({
-		embeds: ocr_results_original.map((res, index) => {
+		embeds: ocr_results_original.map(({ result, timeInMs }, index) => {
 			let attachment = image_attachments.at(index)
 
 			return new EmbedBuilder()
 				.setTitle(path.basename(attachment.url))
 				.setThumbnail(attachment.proxyURL ?? attachment.url)
-				.setColor(typeof res === 'string' ? 0x0000ee : 0xee0000)
-				.setDescription(res ?? '')
+				.setColor(typeof result === 'string' ? 0x0000ee : 0xee0000)
+				.setDescription(result ?? '')
 				.setFooter({
-					text: res
-						? `Recognized in ${time_spent_transcribing}ms`
-						: 'No text was found.',
+					text: result ? `Recognized in ${timeInMs}ms` : 'No text was found.',
 				})
 		}),
 		allowedMentions: {
