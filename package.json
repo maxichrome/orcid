@@ -1,25 +1,30 @@
 {
 	"name": "ocrid",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
+	"description": "Discord bot that returns OCR from images",
+	"main": "dist/index.js",
+	"author": "Max <hey@maxichrome.dev>",
+	"license": "UNLICENSED",
+	"keywords": [
+		"ocr",
+		"google-cloud",
+		"machine-learning",
+		"discord-bot"
+	],
 	"scripts": {
 		"dev": "ts-node src",
 		"build": "tsc",
-		"start": "build/index.js"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^4.0.0",
-		"prettier": "^2.8.3",
-		"ts-node": "^10.9.1",
-		"typescript": "^4.9.4"
+		"start": "node dist/index.js"
 	},
 	"dependencies": {
 		"@google-cloud/vision": "^3.1.0",
 		"discord.js": "^14.7.1",
 		"dotenv": "^16.0.3"
+	},
+	"devDependencies": {
+		"@trivago/prettier-plugin-sort-imports": "^4.0.0",
+		"prettier": "^2.8.3",
+		"ts-node": "^10.9.1",
+		"typescript": "^4.9.4"
 	}
 }
