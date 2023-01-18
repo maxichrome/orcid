@@ -74,7 +74,6 @@ discord.on('messageCreate', async (msg) => {
 	// we have our results! stop "typing"
 	clearInterval(typing_interval)
 
-	// TODO: need to account for splitting at >2000 characters
 	msg.reply({
 		embeds: ocr_results_original.map(({ result, timeInMs }, index) => {
 			let attachment = image_attachments.at(index)
