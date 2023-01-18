@@ -1,3 +1,4 @@
+import { EmbedBuilder } from 'discord.js'
 import * as dotenv from 'dotenv'
 import * as path from 'node:path'
 
@@ -22,7 +23,7 @@ discord.on('messageCreate', async (msg) => {
 	if (msg.author.bot) return
 	if (msg.attachments.size < 1) return
 
-	let processing_promises: Promise<string>[]
+	let processing_promises: Promise<string | null>[]
 	let typing_interval: ReturnType<typeof setInterval>
 
 	const image_attachments = msg.attachments.filter(
@@ -47,35 +48,39 @@ discord.on('messageCreate', async (msg) => {
 			)
 	}, 3000)
 
+	const before_transcription_timestamp = new Date()
+
 	processing_promises = image_attachments.map((attachment) =>
 		// TODO: need to account for errors from GCP api
 		transcribeImageText(attachment.url)
 	)
 
-	let ocr_results = await Promise.all(processing_promises)
-	ocr_results = ocr_results.filter(
-		(result) => typeof result === 'string' && result.length > 0
-	)
+	let ocr_results_original = await Promise.all(processing_promises)
+
+	const after_transcription_timestamp = new Date()
+	const time_spent_transcribing =
+		after_transcription_timestamp.getTime() -
+		before_transcription_timestamp.getTime()
 
 	// we have our results! stop "typing"
 	clearInterval(typing_interval)
 
-	if (ocr_results.length < 1) {
-		msg.reply({
-			content: 'No text was found',
-			allowedMentions: {
-				repliedUser: false,
-			},
-		})
-		return
-	}
-
 	// TODO: need to account for splitting at >2000 characters
 	msg.reply({
-		content: `\
-Text found:\n\
-\n\
-${ocr_results.join('\n\n')}`,
+		embeds: ocr_results_original.map((res, index) => {
+			let attachment = image_attachments.at(index)
+
+			return new EmbedBuilder()
+				.setTitle(path.basename(attachment.url))
+				.setThumbnail(attachment.proxyURL ?? attachment.url)
+				.setColor(typeof res === 'string' ? 0x0000ee : 0xee0000)
+				.setDescription(res ?? '')
+				.setFooter({
+					text: res
+						? `Recognized in ${time_spent_transcribing}ms`
+						: 'No text was found.',
+				})
+		}),
 		allowedMentions: {
 			repliedUser: false,
 		},
