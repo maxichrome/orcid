@@ -1,21 +1,13 @@
-import { Client as DiscordClient, Message } from 'discord.js'
 import * as dotenv from 'dotenv'
 import * as path from 'node:path'
 
-import { transcribeImageText } from './ocr'
+import { discord } from './client/discord'
+import { transcribeImageText } from './lib/ocr'
 
 // load environment variables from .env.local in dir root
 dotenv.config({
 	path: path.join(__dirname, '..', '.env.local'),
 })
-
-namespace globalThis {
-	export let __discordClient: DiscordClient | undefined
-}
-
-const discord = (globalThis.__discordClient ??= new DiscordClient({
-	intents: ['Guilds', 'GuildMessages', 'MessageContent', 'GuildMessageTyping'],
-}))
 
 function startUp(token: string) {
 	discord.login(token)
