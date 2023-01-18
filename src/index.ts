@@ -70,4 +70,16 @@ ${ocr_results.join('\n\n')}`,
 	})
 })
 
+function doGracefulExit(): void {
+	console.log('Exiting gracefully.')
+
+	discord.user.setStatus('invisible')
+	discord.destroy()
+}
+
+// terminal ctrl-c
+process.once('SIGINT', () => doGracefulExit())
+// exited from elsewhere. we probably can't graceful exit from here but let's try
+process.once('SIGTERM', () => doGracefulExit())
+
 startUp(process.env.DISCORD_TOKEN)
