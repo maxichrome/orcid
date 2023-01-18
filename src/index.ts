@@ -34,7 +34,7 @@ discord.on('messageCreate', async (msg) => {
 
 	if (image_attachments.size < 1) {
 		console.log(
-			`NO-IMG: No images found in message. Ignoring it. (id=${msg.id})`
+			`NO-IMG: Ignoring message; has attachments, none are image files. (id=${msg.id})`
 		)
 		return
 	}
