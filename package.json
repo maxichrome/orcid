@@ -1,5 +1,5 @@
 {
-	"name": "ocrid",
+	"name": "orcid",
 	"version": "1.0.0",
 	"description": "Discord bot that returns OCR from images",
 	"main": "dist/index.js",
