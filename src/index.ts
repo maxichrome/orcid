@@ -38,15 +38,24 @@ discord.on('messageCreate', async (msg) => {
 
 	const image_attachments = msg.attachments.filter(
 		(attachment) =>
-			attachment.contentType.startsWith('image/') &&
+			attachment.contentType?.startsWith('image/') &&
 			// exclude svg images
-			!attachment.contentType.startsWith('image/svg')
+			!attachment.contentType?.startsWith('image/svg')
 	)
 
 	if (image_attachments.size < 1) {
 		console.log(
 			`NO-IMG: Ignoring message; has attachments, none are image files. (id=${msg.id})`
 		)
+		return
+	}
+
+	// until i figure out why it always comes back with nothing we just say byebye to this kinda request
+	if (image_attachments.size > 1) {
+		msg.reply(`
+⛔️  **I can't handle more than one image at a time.**
+This could change in the future, but for now take it easy on me and only use a single image per message.\
+`)
 		return
 	}
 
@@ -82,14 +91,18 @@ discord.on('messageCreate', async (msg) => {
 	clearInterval(typing_interval)
 
 	msg.reply({
+		content: ocr_results_original.map(({ result }) => result).join('\n\n'),
 		embeds: ocr_results_original.map(({ result, timeInMs }, index) => {
 			let attachment = image_attachments.at(index)
+			const hasResult = typeof result === 'string'
 
 			return new EmbedBuilder()
+				.setColor(hasResult ? 0x0000ee : 0xee0000)
 				.setTitle(path.basename(attachment.url))
+				.setDescription(
+					hasResult ? '✅ Processed successfully' : '🚫 No text found'
+				)
 				.setThumbnail(attachment.proxyURL ?? attachment.url)
-				.setColor(typeof result === 'string' ? 0x0000ee : 0xee0000)
-				.setDescription(result ?? '<No text found>')
 				.setFooter({
 					text: `Processed in ${timeInMs}ms`,
 				})
