@@ -1,5 +1,18 @@
-import { Client as DiscordClient } from 'discord.js'
+import {
+	Collection,
+	Client as DiscordClient,
+	GatewayIntentBits,
+} from 'discord.js'
+
+import * as extractCommand from '../commands/extract'
 
 export const discord = (globalThis.__discordClient ??= new DiscordClient({
-	intents: ['Guilds', 'GuildMessages', 'MessageContent'],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+	],
 }))
+
+discord.commands = new Collection()
+discord.commands.set('extract', extractCommand)
