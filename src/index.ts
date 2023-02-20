@@ -1,4 +1,4 @@
-import { Events } from 'discord.js'
+import { EmbedBuilder, Events } from 'discord.js'
 import * as dotenv from 'dotenv'
 import * as path from 'node:path'
 
@@ -35,9 +35,19 @@ discord.on(Events.InteractionCreate, async (interaction) => {
 	try {
 		await command.exec(interaction)
 	} catch (err) {
-		console.error(`Error while executing command ${command.meta.name}`, err)
+		if (err instanceof TypeError && err.message === 'NOTIMG') {
+			await interaction.reply({
+				content: `Invalid image type: ${
+					interaction.options.getAttachment('image').contentType || '<none>'
+				}`,
+			})
+			return
+		}
+
+		console.error(`Error while executing command /${command.meta.name}.`, err)
 		await interaction.reply({
 			content: 'There was an error while executing this command!',
+			embeds: [],
 			ephemeral: true,
 		})
 	}

@@ -36,7 +36,7 @@ export async function exec(interaction: CommandInteraction) {
 		// exclude svg images
 		image.contentType?.startsWith('image/svg')
 	)
-		throw new TypeError('Unsupported image type')
+		throw new TypeError('NOTIMG')
 
 	typing_interval = setInterval(() => {
 		interaction.channel
