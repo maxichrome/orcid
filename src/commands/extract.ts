@@ -56,6 +56,9 @@ export async function exec(interaction: CommandInteraction) {
 
 	const filename = path.basename(image.url)
 	const resultB64 = Buffer.from(result.result).toString('base64url')
+	const copiableUrl = `https://copy.maxichrome.dev/?title=${encodeURIComponent(
+		filename
+	)}#${resultB64}`
 
 	interaction.reply({
 		content: '',
@@ -73,12 +76,7 @@ ${result.result
 								result.result.length > RESULT_PREVIEW_TRUNCATE_LIMIT ? '…' : ''
 							}
 
-Click filename to view full result & easily copy/share.`
-						)
-						.setURL(
-							`https://copy.maxichrome.dev/?title=${encodeURIComponent(
-								filename
-							)}#${resultB64}`
+[View full result](${copiableUrl})`
 						)
 						.setThumbnail(image.url)
 						.setFooter({
