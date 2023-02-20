@@ -9,6 +9,8 @@ import * as path from 'node:path'
 
 import { transcribeImageText } from '../lib/ocr'
 
+const RESULT_PREVIEW_TRUNCATE_LIMIT = 140
+
 export const meta = new SlashCommandBuilder()
 	.setName('extract')
 	.setDescription('Perform text recognition on a supplied source image.')
@@ -52,15 +54,33 @@ export async function exec(interaction: CommandInteraction) {
 		timeInMs: time_spent_transcribing,
 	}
 
+	const filename = path.basename(image.url)
+	const resultB64 = new Buffer(result.result, 'base64').toString('base64url')
+
 	interaction.reply({
-		content: result.result,
+		content: '',
 		embeds: [
 			typeof result.result === 'string'
 				? new EmbedBuilder()
 						.setColor(0x0000ee)
-						.setTitle(path.basename(image.url))
-						.setDescription('✅ Processed successfully')
-						.setThumbnail(image.proxyURL ?? image.url)
+						.setTitle(filename)
+						.setDescription(
+							`\
+${result.result
+	.split('\n')
+	.join(' ')
+	.substring(0, RESULT_PREVIEW_TRUNCATE_LIMIT)}${
+								result.result.length > RESULT_PREVIEW_TRUNCATE_LIMIT ? '…' : ''
+							}
+
+Click filename to view full result & easily copy/share.`
+						)
+						.setURL(
+							`https://copy.maxichrome.dev/?title=${encodeURIComponent(
+								filename
+							)}#${resultB64}`
+						)
+						.setThumbnail(image.url)
 						.setFooter({
 							text: `Processed in ${result.timeInMs}ms`,
 						})
@@ -68,7 +88,7 @@ export async function exec(interaction: CommandInteraction) {
 						.setColor(0xee0000)
 						.setTitle(path.basename(image.url))
 						.setDescription('🚫 No text found')
-						.setThumbnail(image.proxyURL ?? image.url)
+						.setThumbnail(image.url)
 						.setFooter({
 							text: `Processed in ${result.timeInMs}ms`,
 						}),
