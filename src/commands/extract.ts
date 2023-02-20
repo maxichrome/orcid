@@ -55,7 +55,7 @@ export async function exec(interaction: CommandInteraction) {
 	}
 
 	const filename = path.basename(image.url)
-	const resultB64 = new Buffer(result.result, 'base64').toString('base64url')
+	const resultB64 = Buffer.from(result.result).toString('base64url')
 
 	interaction.reply({
 		content: '',
