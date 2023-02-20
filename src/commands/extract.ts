@@ -89,6 +89,5 @@ export async function exec(interaction: CommandInteraction) {
 		allowedMentions: {
 			repliedUser: false,
 		},
-		ephemeral: true,
 	})
 }
