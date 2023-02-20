@@ -29,22 +29,12 @@ export async function exec(interaction: CommandInteraction) {
 
 	const image = interaction.options.getAttachment('image', true)
 
-	let typing_interval: ReturnType<typeof setInterval>
-
 	if (
 		!image.contentType?.startsWith('image/') ||
 		// exclude svg images
 		image.contentType?.startsWith('image/svg')
 	)
 		throw new TypeError('NOTIMG')
-
-	typing_interval = setInterval(() => {
-		interaction.channel
-			.sendTyping()
-			.catch((err) =>
-				console.log(`NO-TYP: Typing event not sent due to error\n${err}`)
-			)
-	}, 3000)
 
 	const before_transcription_timestamp = new Date()
 
@@ -61,9 +51,6 @@ export async function exec(interaction: CommandInteraction) {
 		result: transcription_result,
 		timeInMs: time_spent_transcribing,
 	}
-
-	// we have our results! stop "typing"
-	clearInterval(typing_interval)
 
 	interaction.reply({
 		content: result.result,
