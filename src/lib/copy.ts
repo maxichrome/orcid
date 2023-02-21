@@ -11,7 +11,7 @@ export const generateCopyUrl = (
 		params.set('title', encodeURIComponent(title))
 	}
 
-	return `https://copy.maxichrome.vercel.app/${
+	return `https://copiable.maxichrome.vercel.app/${
 		params.values.length > 0 ? '?' + params.toString() : ''
 	}#${contentBase64}`
 }
