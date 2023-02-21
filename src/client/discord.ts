@@ -7,11 +7,7 @@ import {
 import * as extractCommand from '../commands/extract'
 
 export const discord = (globalThis.__discordClient ??= new DiscordClient({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-	],
+	intents: [GatewayIntentBits.Guilds],
 }))
 
 discord.commands = new Collection()
