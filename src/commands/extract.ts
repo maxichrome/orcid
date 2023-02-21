@@ -8,8 +8,7 @@ import {
 import * as path from 'node:path'
 
 import { transcribeImageText } from '../lib/ocr'
-
-const RESULT_PREVIEW_TRUNCATE_LIMIT = 140
+import { resultBody } from '../messages'
 
 export const meta = new SlashCommandBuilder()
 	.setName('extract')
@@ -38,49 +37,29 @@ export async function exec(interaction: CommandInteraction) {
 	)
 		throw new TypeError('NOTIMG')
 
-	const before_transcription_timestamp = new Date()
+	const timestampPreTranscription = new Date()
 
 	// TODO: need to account for errors from GCP api
-	const transcription_result = await transcribeImageText(image.url)
+	const ocrResult = await transcribeImageText(image.url)
 
-	const after_transcription_timestamp = new Date()
+	const timestampPostTranscription = new Date()
 
-	const time_spent_transcribing =
-		after_transcription_timestamp.getTime() -
-		before_transcription_timestamp.getTime()
-
-	const result = {
-		result: transcription_result,
-		timeInMs: time_spent_transcribing,
-	}
+	const ocrMillisecondsSpent =
+		timestampPostTranscription.getTime() - timestampPreTranscription.getTime()
 
 	const filename = path.basename(image.url)
-	const resultB64 = Buffer.from(result.result).toString('base64url')
-	const copiableUrl = `https://copy.maxichrome.dev/?title=${encodeURIComponent(
-		filename
-	)}#${resultB64}`
 
 	interaction.reply({
 		content: '',
 		embeds: [
-			typeof result.result === 'string'
+			typeof ocrResult === 'string'
 				? new EmbedBuilder()
 						.setColor(0x0000ee)
 						.setTitle(filename)
-						.setDescription(
-							`\
-${result.result
-	.split('\n')
-	.join(' ')
-	.substring(0, RESULT_PREVIEW_TRUNCATE_LIMIT)}${
-								result.result.length > RESULT_PREVIEW_TRUNCATE_LIMIT ? '…' : ''
-							}
-
-[View full result](${copiableUrl})`
-						)
+						.setDescription(resultBody(ocrResult))
 						.setThumbnail(image.url)
 						.setFooter({
-							text: `Processed in ${result.timeInMs}ms`,
+							text: `Processed in ${ocrMillisecondsSpent}ms`,
 						})
 				: new EmbedBuilder()
 						.setColor(0xee0000)
@@ -88,7 +67,7 @@ ${result.result
 						.setDescription('🚫 No text found')
 						.setThumbnail(image.url)
 						.setFooter({
-							text: `Processed in ${result.timeInMs}ms`,
+							text: `Processed in ${ocrMillisecondsSpent}ms`,
 						}),
 		],
 		allowedMentions: {
